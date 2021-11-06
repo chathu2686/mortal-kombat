@@ -1,0 +1,26 @@
+{
+  "name": "mortal-kombat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "mk.inquirer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chathu2686/mortal-kombat.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chathu2686/mortal-kombat/issues"
+  },
+  "homepage": "https://github.com/chathu2686/mortal-kombat#readme",
+  "devDependencies": {
+    "jest": "^27.3.1"
+  },
+  "dependencies": {
+    "inquirer": "^8.2.0"
+  }
+}
