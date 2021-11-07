@@ -1,15 +1,13 @@
-class Fighter {
-  constructor(name, health, realm, moves, fatalities) {
-    this.name = name;
-    this.health = health;
-    this.realm = realm;
-    this.moves = moves;
-    this.fatalities = fatalities;
-    this.attack = 1;
-  }
+const fighterDb = require("./fighterDb");
 
-  random(min, max) {
-    return Math.floor(Math.random() * (max - min) + min);
+class Fighter {
+  constructor(fighter) {
+    this.name = fighter.name;
+    this.health = fighter.health;
+    this.realm = fighter.realm;
+    this.moves = fighter.moves;
+    this.fatalities = fighter.fatalities;
+    this.attack = 1;
   }
 }
 
@@ -19,8 +17,13 @@ class Battle {
     this.playerName = playerName;
     this.playerFighter = playerFighter;
     this.aiFighter = aiFighter;
+    this.mode = "manual";
   }
-
+  //----------randomizer--------
+  randomizer(num) {
+    return Math.floor(Math.random() * num);
+  }
+  //---------realmDamage--------
   realmDamage() {
     const playerRealm = this.playerFighter.realm;
     const aiRealm = this.aiFighter.realm;
@@ -28,10 +31,10 @@ class Battle {
     if (playerRealm === "Earth" && aiRealm === "Nether") {
       this.playerFighter.attack *= 0.9;
       this.aiFighter.attack *= 1.1;
-    } else if (playerRealm === "Nether" && aiRealm === "Earth") {
+    } else if (playerRealm === "Earth" && aiRealm === "Chaos") {
       this.playerFighter.attack *= 1.1;
       this.aiFighter.attack *= 0.9;
-    } else if (playerRealm === "Earth" && aiRealm === "Chaos") {
+    } else if (playerRealm === "Nether" && aiRealm === "Earth") {
       this.playerFighter.attack *= 1.1;
       this.aiFighter.attack *= 0.9;
     } else if (playerRealm === "Chaos" && aiRealm === "Earth") {
@@ -39,73 +42,133 @@ class Battle {
       this.aiFighter.attack *= 1.1;
     }
 
+    console.log(`\nRealm Damage`);
     console.log(
       `${this.playerName} gets ${Math.floor(
         this.playerFighter.attack * 100
-      )}% attack!`
+      )}% of usual attack damage!`
     );
     console.log(
       `${this.aiFighter.name} gets ${Math.floor(
         this.aiFighter.attack * 100
-      )}% attack!`
+      )}% of usual attack damage!\n`
     );
   }
 
-  randomizer(num) {
-    return Math.floor(Math.random() * num);
+  //-------------isCritical----------
+  isCritical() {
+    const critical = this.randomizer(101);
+    if (critical > 75) {
+      console.log(`It's a critical Hit!!!`);
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  attack() {
-    const playerMove = this.playerFighter.moves[this.randomizer(4)];
+  //----------------fight--------------
+  fight(move) {
+    // when player attacks ai---
+    console.log(
+      `${this.playerName} attacks ${this.aiFighter.name} with ${move}!`
+    );
+
+    //player attack damage randomly generated
     const playerAttack = Math.floor(
       this.playerFighter.attack * this.randomizer(26)
     );
-    this.aiFighter.health -= playerAttack;
+
+    //if player attck is a critical hit
+    if (this.isCritical()) {
+      this.aiFighter.health -= playerAttack * 3;
+      console.log(
+        `${this.playerName} inflicts ${playerAttack * 3} damage on ${
+          this.aiFighter.name
+        }!`
+      );
+    }
+
+    // if player attack is not a critical hit
+    else {
+      this.aiFighter.health -= playerAttack;
+      console.log(
+        `${this.playerName} inflicts ${playerAttack * 3} damage on ${
+          this.aiFighter.name
+        }!`
+      );
+    }
+
+    // when ai attacks back player---
+    const aiMove = this.aiFighter.moves[this.randomizer(3)];
 
     console.log(
-      `${this.playerName} attacks ${this.aiFighter.name} with ${playerMove} and inflicts ${playerAttack} damage!!!`
+      `${this.aiFighter.name} attacks ${this.playerName} with ${aiMove}!`
     );
-
-    const aiMove = this.aiFighter.moves[this.randomizer(4)];
+    //ai attack damage randomly generated
     const aiAttack = Math.floor(this.aiFighter.attack * this.randomizer(26));
-    this.playerFighter.health -= aiAttack;
 
+    // if ai attack is a critical hit
+    if (this.isCritical()) {
+      this.playerFighter.health -= aiAttack * 3;
+      console.log(
+        `${this.aiFighter.name} inflicts ${aiAttack * 3} damage on ${
+          this.playerName
+        }!`
+      );
+    }
+    // if ai attack is not a critical hit
+    else {
+      this.playerFighter.health -= aiAttack * 3;
+      console.log(
+        `${this.aiFighter.name} inflicts ${playerAttack} damage on ${this.playerName}!`
+      );
+    }
+
+    //confirmation of fighter health levels after one round of fighting
     console.log(
-      `${this.aiFighter.name} attacks ${this.playerName} with ${aiMove} and inflicts ${aiAttack} damage!!!`
+      `---${this.playerName} now has ${this.playerFighter.health} health and ${this.aiFighter.name} has ${this.aiFighter.health} health--- \n`
     );
-
-    console.log(
-      `${this.playerName} now has ${this.playerFighter.health} health remaining and ${this.aiFighter.name} has ${this.aiFighter.health} health remaining!!!`
-    );
-
-    let artiAttack = Math.floor(this.aiFighter.attack * this.randomizer(26));
-    this.playerFighter.health -= artiAttack;
+  }
+  //-------------ending-----------
+  ending(winner, loser, falality) {
+    console.log(`${loser} has lost the fight!!!\n`);
+    console.log("!!!!!!!!!!!!!!!!!Finish Him!!!!!!!!!!!!!!!!!!!\n");
+    console.log(`${winner} kills ${loser} with ${falality} fatality!!!`);
+    console.log(`MUHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHA`);
   }
 }
 
-const tharaka = new Fighter(
-  "Raiden",
-  450,
-  "Earth",
-  ["Lightning Storm", "a", "b", "c"],
-  ["Electric Decapitation", "Hello"]
-);
+class Autobattle extends Battle {
+  constructor(userName, userFighter, aiCharacter) {
+    super(userName, userFighter, aiCharacter);
+    this.mode = "auto";
+  }
 
-const bot = new Fighter(
-  "scorpion",
-  400,
-  "Nether",
-  ["Fire Whoop", "x", "y", "z"],
-  ["Electric Decapitation", "p", "q", "r"]
-);
+  autocombat() {
+    console.log(`!!!LET THE BATTLE BEGIN!!!\n`);
+    // while loop will regenratete fight rounds until one fighter health reaches 0 or below
+    while (this.playerFighter.health > 0 && this.aiFighter.health > 0) {
+      const userMove = this.playerFighter.moves[this.randomizer(3)];
+      this.fight(userMove);
+    }
 
-console.log(tharaka);
-console.log(bot);
+    //checking who won the fight and intialising ending
+    let autoWinner;
+    let autoLoser;
+    let autoFatality;
 
-const bat = new Battle("tharaka", tharaka, bot);
+    if (this.playerFighter.health > 0) {
+      autoWinner = this.playerName;
+      autoLoser = this.aiFighter.name;
+      autoFatality = this.playerFighter.fatalities[this.randomizer(3)];
+    } else {
+      autoWinner = this.aiFighter.name;
+      autoLoser = this.playerName;
+      autoFatality = this.aiFighter.fatalities[this.randomizer(3)];
+    }
+    console.log(`${autoWinner} is the winner!!!`);
+    this.ending(autoWinner, autoLoser, autoFatality);
+  }
+}
 
-bat.realmDamage();
-
-bat.attack();
-
-console.log(bat);
+module.exports = { Fighter, Battle, Autobattle };
